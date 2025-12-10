@@ -1,34 +1,44 @@
-import pool from "../config/db.js";
+// src/controllers/commentController.js
+import prisma from "../config/prisma.js";
 
-export const addComment = async (req, res) => { 
-    try {
-        const { user_id, product_id, comment, rating } = req.body;
+//  Thêm bình luận
+export const addComment = async (req, res) => {
+  try {
+    const { userId, productId, comment, rating } = req.body;
 
-        if (!user_id || !product_id || !rating) {
-            return res.status(400).json({ message: "Thiếu thông tin bắt buộc!" });
-        }
-
-        await pool.query(
-            `INSERT INTO comments (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)`,
-            [user_id, product_id, comment, rating]
-        );
-
-        res.status(201).json({ message: "Bình luận đã được thêm!" });
-    } catch (error) {
-        console.error("Lỗi thêm bình luận:", error);
-        res.status(500).json({ message: "Lỗi server!" });
+    if (!userId || !productId || !rating) {
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc!" });
     }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        userId,
+        productId,
+        comment,
+        rating,
+      },
+    });
+
+    res.status(201).json({ message: "Bình luận đã được thêm!", comment: newComment });
+  } catch (error) {
+    console.error("Lỗi thêm bình luận:", error);
+    res.status(500).json({ message: "Lỗi server!" });
+  }
 };
 
-export const getCommentsByProduct = async (req, res) => { 
-    try {
-        const { product_id } = req.params;
-        const [comments] = await pool.query(`SELECT * FROM comments WHERE product_id = ?`, [product_id]);
+//  Lấy bình luận theo sản phẩm
+export const getCommentsByProduct = async (req, res) => {
+  try {
+    const productId = Number(req.params.productId);
 
-        res.status(200).json(comments);
-    } catch (error) {
-        console.error("Lỗi lấy bình luận:", error);
-        res.status(500).json({ message: "Lỗi server!" });
-    }
+    const comments = await prisma.comment.findMany({
+      where: { productId },
+      orderBy: { createdAt: "desc" }, // có thể thêm createdAt nếu muốn sắp xếp theo thời gian
+    });
+
+    res.status(200).json(comments);
+  } catch (error) {
+    console.error("Lỗi lấy bình luận:", error);
+    res.status(500).json({ message: "Lỗi server!" });
+  }
 };
-    
