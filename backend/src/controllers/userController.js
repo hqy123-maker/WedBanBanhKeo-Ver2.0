@@ -99,7 +99,7 @@ export const deleteUser = async (req, res) => {
 };
 
 
-// 📌 Cập nhật thông tin người dùng (Chính chủ hoặc Admin)
+//  Cập nhật thông tin người dùng (Chính chủ hoặc Admin)
 export const updateUser = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -107,12 +107,12 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, password, role } = req.body;
 
-    // 📌 Người dùng chỉ được cập nhật chính họ, Admin có thể cập nhật tất cả
+    //  Người dùng chỉ được cập nhật chính họ, Admin có thể cập nhật tất cả
     if (!isAdmin && userId != id) {
       return res.status(403).json({ message: "Bạn không có quyền cập nhật thông tin người khác" });
     }
 
-    // 📌 Kiểm tra email đã tồn tại chưa (tránh trùng email)
+    //  Kiểm tra email đã tồn tại chưa (tránh trùng email)
     if (email) {
       const [existingUser] = await pool.query(`
         SELECT id FROM users WHERE email = ? AND id != ?
@@ -123,13 +123,13 @@ export const updateUser = async (req, res) => {
       }
     }
 
-    // 📌 Mã hóa mật khẩu nếu có thay đổi
+    //  Mã hóa mật khẩu nếu có thay đổi
     let hashedPassword = null;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
-    // 📌 Chỉ admin mới có quyền cập nhật role
+    //  Chỉ admin mới có quyền cập nhật role
     let query = "UPDATE users SET name = ?, email = ?";
     let params = [name, email];
 

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const http = axios.create({
   baseURL: process.env.VUE_APP_API_URL || 'http://localhost:5000/api',
+  withCredentials: true,
 });
 
 // Interceptor cho request
